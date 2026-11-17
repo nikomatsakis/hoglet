@@ -1,0 +1,18 @@
+[book]
+title = "Hoglet"
+description = "The design and development of an MCP server for HedgeDoc 1.x."
+language = "en"
+src = "book"
+
+[build]
+build-dir = "target/anchorbook"
+create-missing = false
+
+[output.html.fold]
+enable = true
+level = 1
+
+[preprocessor.anchorbook]
+command = "target/tools/bin/anchorbook md"
+config = "anchorbook.toml"
+after = ["links"]

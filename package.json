@@ -1,0 +1,39 @@
+{
+  "name": "hoglet",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local MCP read/edit bridge for HedgeDoc 1.x",
+  "engines": { "node": ">=24.15.0 <25" },
+  "packageManager": "npm@11.12.1",
+  "bin": { "hoglet": "dist/src/cli.js" },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test dist/test/*.test.js",
+    "start": "node dist/src/cli.js serve",
+    "check:criteria": "node scripts/check-criteria.mjs",
+    "test:browser": "npm run build && HOGLET_BROWSER_TEST=1 node --test dist/test/browser.test.js",
+    "test:service": "npm run build && node scripts/acceptance.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "ot": "0.0.15",
+    "playwright": "1.65.1",
+    "socket.io-client": "4.8.4",
+    "socket.io-client-v2": "npm:socket.io-client@2.5.0",
+    "tough-cookie": "6.1.0",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/ot": "0.0.8",
+    "socket.io": "4.8.4",
+    "socket.io-v2": "npm:socket.io@2.5.1",
+    "typescript": "7.0.2"
+  },
+  "overrides": {
+    "debug": "4.4.3",
+    "cookie": "0.7.2"
+  }
+}

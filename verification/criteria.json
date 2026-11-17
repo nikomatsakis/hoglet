@@ -1,0 +1,103 @@
+{
+  "A-mcp-usable-tools:protocol-session": {
+    "coverage": "full",
+    "files": ["test/mcp.test.ts"],
+    "cases": ["initialize/discover/all tools/errors, pure protocol stdout"]
+  },
+  "A-mcp-usable-tools:tool-contracts": {
+    "coverage": "partial",
+    "files": ["test/mcp.test.ts"],
+    "cases": ["initialize/discover/all tools/errors, pure protocol stdout"],
+    "gap": "Schema review is provisional; full per-tool service-error matrix remains."
+  },
+  "A-mcp-bounded-calls:deadline-outcomes": {
+    "coverage": "partial",
+    "files": ["test/mcp.test.ts", "test/bridge.test.ts"],
+    "cases": ["MCP bounded calls", "MCP cancellation", "canceled pending write"],
+    "gap": "MCP suppresses canceled-request responses; local diagnostics preserve classification. Exhaustive before-submit cancellation and input-size cases remain."
+  },
+  "A-mcp-bounded-calls:process-lifecycle": {
+    "coverage": "partial",
+    "files": ["test/mcp.test.ts"],
+    "cases": ["MCP graceful shutdown"],
+    "gap": "Pending-write SIGTERM tested; full startup/interrupt/login-helper cleanup matrix remains."
+  },
+  "A-notes-faithful-content:markdown-roundtrip": {
+    "coverage": "partial",
+    "files": ["test/bridge.test.ts", "test/mcp.test.ts", "scripts/acceptance.mjs"],
+    "cases": ["raw Markdown, BOM", "raw Unicode/frontmatter read"],
+    "gap": "Creation is deferred. Real-service Unicode/frontmatter tested; exhaustive real-content matrix remains."
+  },
+  "A-notes-faithful-content:snapshot-provenance": {
+    "coverage": "partial",
+    "files": ["test/edits.test.ts", "test/bridge.test.ts"],
+    "cases": ["snapshot binds origin", "stale persisted read"],
+    "gap": "Scope and persisted/live divergence tested; complete metadata/reset matrix remains."
+  },
+  "A-notes-precise-edits:replacement-validation": {
+    "coverage": "partial",
+    "files": ["test/edits.test.ts", "test/bridge.test.ts"],
+    "cases": ["invalid batches", "stale persisted read"],
+    "gap": "Compiler and selected no-emission cases tested; exhaustive malformed inputs through MCP remain."
+  },
+  "A-notes-precise-edits:unicode-operations": {
+    "coverage": "partial",
+    "files": ["test/edits.test.ts", "test/bridge.test.ts", "scripts/acceptance.mjs"],
+    "cases": ["independent exact/UTF-16", "generated Unicode", "UTF-16 edit and named ack"],
+    "gap": "Independent wire application and expected text tested; package source matches both upstream targets. Exhaustive real-service cases remain."
+  },
+  "A-notes-observable-edits:authenticated-edit": {
+    "coverage": "partial",
+    "files": ["test/mcp.test.ts", "scripts/acceptance.mjs"],
+    "cases": ["initialize/discover/all tools", "database-backed readback"],
+    "gap": "Actual releases tested with disposable email users; GitHub-established identity pending."
+  },
+  "A-notes-observable-edits:concurrent-edit": {
+    "coverage": "partial",
+    "files": ["test/bridge.test.ts", "scripts/acceptance.mjs"],
+    "cases": ["overlapping insertion", "remote change during identity", "service-wide queue", "second-editor change"],
+    "gap": "Controlled races tested; full real-service event-order matrix remains."
+  },
+  "A-notes-observable-edits:edit-outcomes": {
+    "coverage": "partial",
+    "files": ["test/bridge.test.ts", "test/mcp.test.ts"],
+    "cases": ["preserves truthful outcomes", "identity loss after ack", "live NUL"],
+    "gap": "Silence, reset, disconnect, callback distinction, failed save and cancellation tested; full real-service fault matrix remains."
+  },
+  "A-service-compatible-transports:release-matrix": {
+    "coverage": "partial",
+    "files": ["test/bridge.test.ts", "test/mcp.test.ts", "scripts/acceptance.mjs"],
+    "cases": ["exact release mismatch", "release"],
+    "gap": "1.10.3 and 1.12.0 basic acceptance passed; GitHub, real prefix/reconnect, permission and complete concurrency matrix pending."
+  },
+  "A-service-respect-access:permission-boundaries": {
+    "coverage": "partial",
+    "files": ["test/bridge.test.ts"],
+    "cases": ["owner permissions", "identity loss"],
+    "gap": "Owner-only denials and silent rejection tested; six modes with all identities on actual releases pending. Creation deferred."
+  },
+  "A-service-contained-requests:request-boundaries": {
+    "coverage": "partial",
+    "files": ["test/edits.test.ts", "test/bridge.test.ts"],
+    "cases": ["selectors and scope", "scoped prefix", "malformed response"],
+    "gap": "Identifier, HTTP/WebSocket prefix and redirect rejection tested; independent credential-sink listener matrix remains. Prototype uses WebSocket only."
+  },
+  "A-service-verified-identity:identity-lifecycle": {
+    "coverage": "partial",
+    "files": ["test/bridge.test.ts", "test/mcp.test.ts", "test/browser.test.ts"],
+    "cases": ["wrong user", "rolling expiry", "local session import", "browser-assisted"],
+    "gap": "Import, synthetic Chromium provisioning, invalidation and renewal tested; real GitHub and complete switching/expiry matrix pending."
+  },
+  "A-service-private-credentials:credential-flow": {
+    "coverage": "partial",
+    "files": ["test/mcp.test.ts", "test/browser.test.ts"],
+    "cases": ["pure protocol stdout", "minimal credential export", "protected file"],
+    "gap": "Synthetic secrets, minimal export and owner-only storage tested; independent flow review remains."
+  },
+  "A-notes-truthful-creation:creation-outcomes": {
+    "coverage": "deferred",
+    "files": [],
+    "cases": [],
+    "gap": "Creation is outside the assigned read/edit tool surface."
+  }
+}

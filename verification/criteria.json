@@ -1,13 +1,31 @@
 {
+  "A-cli-note-operations:command-contracts": {
+    "coverage": "partial",
+    "files": ["test/cli.test.ts", "test/mcp.test.ts", "test/note-cli.test.ts", "scripts/test-standalone.mjs"],
+    "cases": ["CLI entry points", "CLI skill", "MCP command aliases", "exact raw/JSON reads", "classified write outcomes", "CLI selection", "CLI validation"],
+    "gap": "Selected actual-command and installed-runtime cases; full real-service/GitHub/permission matrix remains."
+  },
+  "A-cli-note-operations:command-cancellation": {
+    "coverage": "partial",
+    "files": ["test/note-cli.test.ts"],
+    "cases": ["CLI cancellation", "stalled stdin", "post-submission"],
+    "gap": "Selected stdin, HTTP and write-signal cases; exhaustive process fault/event-order matrix remains."
+  },
+  "A-mcp-independent-install:standalone-runtime": {
+    "coverage": "partial",
+    "files": ["scripts/test-standalone.mjs"],
+    "cases": ["Real installer / relocated launcher", "installed browser setup", "Failed update must preserve"],
+    "gap": "Host packaging acceptance; macOS x64 and Linux need their own executions. Real GitHub participation, interrupted installer recovery and platform distribution review remain."
+  },
   "A-mcp-usable-tools:protocol-session": {
     "coverage": "full",
     "files": ["test/mcp.test.ts"],
-    "cases": ["initialize/discover/all tools/errors, pure protocol stdout"]
+    "cases": ["initialize/discover/all tools/errors, pure protocol stdout", "MCP multiple services"]
   },
   "A-mcp-usable-tools:tool-contracts": {
     "coverage": "partial",
     "files": ["test/mcp.test.ts"],
-    "cases": ["initialize/discover/all tools/errors, pure protocol stdout"],
+    "cases": ["initialize/discover/all tools/errors, pure protocol stdout", "MCP multiple services"],
     "gap": "Schema review is provisional; full per-tool service-error matrix remains."
   },
   "A-mcp-bounded-calls:deadline-outcomes": {
@@ -19,7 +37,7 @@
   "A-mcp-bounded-calls:process-lifecycle": {
     "coverage": "partial",
     "files": ["test/mcp.test.ts"],
-    "cases": ["MCP graceful shutdown"],
+    "cases": ["MCP graceful shutdown", "MCP multiple services"],
     "gap": "Pending-write SIGTERM tested; full startup/interrupt/login-helper cleanup matrix remains."
   },
   "A-notes-faithful-content:markdown-roundtrip": {
@@ -67,7 +85,7 @@
   "A-service-compatible-transports:release-matrix": {
     "coverage": "partial",
     "files": ["test/bridge.test.ts", "test/mcp.test.ts", "scripts/acceptance.mjs"],
-    "cases": ["exact release mismatch", "release"],
+    "cases": ["exact release mismatch", "release", "MCP multiple services"],
     "gap": "1.10.3 and 1.12.0 basic acceptance passed; GitHub, real prefix/reconnect, permission and complete concurrency matrix pending."
   },
   "A-service-respect-access:permission-boundaries": {
@@ -78,21 +96,27 @@
   },
   "A-service-contained-requests:request-boundaries": {
     "coverage": "partial",
-    "files": ["test/edits.test.ts", "test/bridge.test.ts"],
-    "cases": ["selectors and scope", "scoped prefix", "malformed response"],
+    "files": ["test/edits.test.ts", "test/bridge.test.ts", "test/mcp.test.ts", "test/services.test.ts"],
+    "cases": ["selectors and scope", "scoped prefix", "malformed response", "MCP multiple services", "scoped credential rejection"],
     "gap": "Identifier, HTTP/WebSocket prefix and redirect rejection tested; independent credential-sink listener matrix remains. Prototype uses WebSocket only."
   },
   "A-service-verified-identity:identity-lifecycle": {
     "coverage": "partial",
-    "files": ["test/bridge.test.ts", "test/mcp.test.ts", "test/browser.test.ts"],
-    "cases": ["wrong user", "rolling expiry", "local session import", "browser-assisted"],
+    "files": ["test/bridge.test.ts", "test/mcp.test.ts", "test/browser.test.ts", "test/cli.test.ts", "test/services.test.ts"],
+    "cases": ["wrong user", "rolling expiry", "local session import", "browser-assisted", "local auth CLI", "forbidden HTTP 200", "MCP multiple services", "legacy record compatibility"],
     "gap": "Import, synthetic Chromium provisioning, invalidation and renewal tested; real GitHub and complete switching/expiry matrix pending."
   },
   "A-service-private-credentials:credential-flow": {
     "coverage": "partial",
-    "files": ["test/mcp.test.ts", "test/browser.test.ts"],
-    "cases": ["pure protocol stdout", "minimal credential export", "protected file"],
+    "files": ["test/mcp.test.ts", "test/browser.test.ts", "test/cli.test.ts", "test/services.test.ts", "test/keychain.test.ts"],
+    "cases": ["pure protocol stdout", "minimal credential export", "protected file", "without echoing secrets", "private storage"],
     "gap": "Synthetic secrets, minimal export and owner-only storage tested; independent flow review remains."
+  },
+  "A-service-private-credentials:keychain-storage": {
+    "coverage": "partial",
+    "files": ["test/keychain.test.ts"],
+    "cases": ["Keychain storage: secret-free", "legacy migration verifies", "denied access", "actual macOS CLI"],
+    "gap": "Native macOS CLI/MCP, migration, renewal and deletion exercised. Denial and failed metadata publication use a controlled adapter; actual locked-Keychain/UI behavior, independent flow review and abrupt-crash cleanup remain."
   },
   "A-notes-truthful-creation:creation-outcomes": {
     "coverage": "deferred",

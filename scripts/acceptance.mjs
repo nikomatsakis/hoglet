@@ -96,5 +96,7 @@ try {
     status: "passed",
   }, null, 2));
 } finally {
-  second?.close(); await client.close(); await rm(directory, { recursive: true, force: true });
+  second?.close(); await client.close();
+  await new Session(config).logout();
+  await rm(directory, { recursive: true, force: true });
 }

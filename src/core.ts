@@ -1,15 +1,23 @@
 import { createHash } from "node:crypto";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { isAbsolute, join } from "node:path";
 
 export class HogletError extends Error {
   constructor(public code: string, message: string) { super(message); }
+}
+
+export function requireSupportedRuntime(version = process.versions.node): void {
+  const [major, minor] = version.split(".").map(Number);
+  if (major !== 24 || minor < 15 || !Number.isInteger(minor))
+    throw new HogletError("unsupported-runtime",
+      `Hoglet requires Node.js >=24.15.0 <25; running ${version}. Select Node 24.15.0 before retrying. With Volta: volta run --node 24.15.0 --npm 11.12.1 npm run auth SERVER.`);
 }
 
 export interface Config {
   service: URL;
   release: "1.10.3" | "1.12.0";
   sessionFile: string;
+  credentialStore: "file" | "keychain";
   anonymous: boolean;
   cookieName: string;
   callMs: number;
@@ -21,6 +29,8 @@ export interface Config {
 }
 
 export function serviceUrl(input: string): URL {
+  if (!input || /[\s\\]/.test(input))
+    throw new HogletError("configuration", "Use a service origin with an optional plain deployment prefix.");
   const url = new URL(input);
   if (!["http:", "https:"].includes(url.protocol) || url.username || url.password ||
       url.search || url.hash || /%|\\|\/\//.test(url.pathname))
@@ -29,14 +39,29 @@ export function serviceUrl(input: string): URL {
   return url;
 }
 
-export function configFromEnv(env = process.env): Config {
-  if (!env.HOGLET_SERVICE) throw new HogletError("configuration", "Set HOGLET_SERVICE to the HedgeDoc base URL.");
+export function serviceArgument(input: string): URL {
+  try { return serviceUrl(input.includes("://") ? input : "https://" + input); }
+  catch { throw new HogletError("configuration", "Use a server hostname or HTTP(S) base URL with an optional plain prefix."); }
+}
+
+export function dataDirectory(env = process.env): string {
+  const root = env.XDG_DATA_HOME;
+  return join(root && isAbsolute(root) ? root : join(homedir(), ".local/share"), "hoglet");
+}
+
+export function configFromEnv(env = process.env, serviceInput?: string): Config {
+  if (serviceInput === undefined && !env.HOGLET_SERVICE)
+    throw new HogletError("configuration", "Supply a server hostname/base URL or set HOGLET_SERVICE.");
   let service: URL;
-  try { service = serviceUrl(env.HOGLET_SERVICE); }
+  try { service = serviceInput === undefined ? serviceUrl(env.HOGLET_SERVICE!) : serviceArgument(serviceInput); }
   catch { throw new HogletError("configuration", "HOGLET_SERVICE must be an HTTP(S) origin with an optional plain prefix."); }
   const release = env.HOGLET_RELEASE ?? "1.10.3";
   if (release !== "1.10.3" && release !== "1.12.0")
     throw new HogletError("unsupported-release", "Prototype profiles: 1.10.3 and 1.12.0.");
+  const credentialStore = env.HOGLET_CREDENTIAL_STORE ?? (process.platform === "darwin" ? "keychain" : "file");
+  if (!["file", "keychain"].includes(credentialStore) ||
+      (credentialStore === "keychain" && process.platform !== "darwin"))
+    throw new HogletError("configuration", "Use file credential storage, or keychain on macOS.");
   const number = (name: string, fallback: number, max: number) => {
     const n = Number(env[name] ?? fallback);
     if (!Number.isSafeInteger(n) || n < 1 || n > max)
@@ -48,8 +73,8 @@ export function configFromEnv(env = process.env): Config {
     throw new HogletError("configuration", "Invalid cookie name.");
   const key = createHash("sha256").update(service.href).digest("hex").slice(0, 20);
   return {
-    service, release, cookieName,
-    sessionFile: env.HOGLET_SESSION_FILE ?? join(homedir(), ".local/share/hoglet", key, "session.json"),
+    service, release, cookieName, credentialStore: credentialStore as Config["credentialStore"],
+    sessionFile: env.HOGLET_SESSION_FILE ?? join(dataDirectory(env), key, "session.json"),
     anonymous: env.HOGLET_ANONYMOUS === "1",
     callMs: number("HOGLET_CALL_MS", 15000, 120000),
     connectMs: number("HOGLET_CONNECT_MS", 4000, 60000),

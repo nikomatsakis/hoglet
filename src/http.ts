@@ -57,21 +57,32 @@ export class ServiceHttp {
     } finally { reader.releaseLock(); }
   }
 
+  // Provisioning can discover a user before the session has a pinned identity.
+  async discoverIdentity(signal: AbortSignal): Promise<{ id: string; name: string }> {
+    try {
+      const me = Identity.parse(JSON.parse(await this.get("me", "json", signal)));
+      return { id: me.id, name: me.name };
+    } catch (e) {
+      if (e instanceof HogletError) throw e;
+      throw new HogletError("authentication-required", "HedgeDoc did not verify a signed-in user; run hoglet auth.");
+    }
+  }
+
   async identity(signal: AbortSignal): Promise<{ id: string; name: string }> {
     try {
       const generation = this.session.generation;
       await this.session.checkStore();
       if (generation !== this.session.generation) this.onInvalidIdentity();
       if (!this.session.userId)
-        throw new HogletError("authentication-required", "Run the local login or import-session command.");
-      const me = Identity.parse(JSON.parse(await this.get("me", "json", signal)));
+        throw new HogletError("authentication-required", "Run hoglet auth or the local import-session command.");
+      const me = await this.discoverIdentity(signal);
       if (me.id !== this.session.userId)
         throw new HogletError("identity-changed", "HedgeDoc identity differs from the provisioned user.");
       return { id: me.id, name: me.name };
     } catch (e) {
       this.session.invalidate(); this.onInvalidIdentity();
       if (e instanceof HogletError) throw e;
-      throw new HogletError("authentication-required", "HedgeDoc did not verify the provisioned user; run local login.");
+      throw new HogletError("authentication-required", "HedgeDoc did not verify the provisioned user; run hoglet auth.");
     }
   }
 

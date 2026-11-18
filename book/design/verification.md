@@ -11,6 +11,8 @@ an entire real-service criterion.
 
 | Anchor | Criteria | Evidence boundary |
 | --- | --- | --- |
+| `A-cli-note-operations` | `command-contracts`, `command-cancellation` | Local help/skill workflow, actual CLI input/output/exit status, two transport fixtures, bounded stdin and signal interruption |
+| `A-mcp-independent-install` | `standalone-runtime` | Actual shell installer, relocated distribution, incompatible system runtime, browser/auth and installed stdio MCP |
 | `A-mcp-usable-tools` | `protocol-session`, `tool-contracts` | Actual Node process, MCP client, published schemas, and recorded schema review |
 | `A-mcp-bounded-calls` | `deadline-outcomes`, `process-lifecycle` | Actual process with stalled services, cancellation, and shutdown |
 | `A-notes-faithful-content` | `markdown-roundtrip`, `snapshot-provenance` | Independently supplied HTTP content and live/persisted divergence |
@@ -18,7 +20,7 @@ an entire real-service criterion.
 | `A-notes-observable-edits` | `authenticated-edit`, `concurrent-edit`, `edit-outcomes` | MCP, two compatible editors, controlled protocol faults, and stored readback |
 | `A-service-respect-access` | `permission-boundaries` | Recognized permission modes, distinct users, and upstream denial |
 | `A-service-verified-identity` | `identity-lifecycle` | Provisioning, `/me`, shared HTTP/socket session, and invalidation |
-| `A-service-private-credentials` | `credential-flow` | Local login/storage/IPC, captured outputs, synthetic secrets, and recorded flow review |
+| `A-service-private-credentials` | `credential-flow`, `keychain-storage` | Local login/storage/IPC, native macOS Keychain, migration, captured outputs, synthetic secrets, and recorded flow review |
 | `A-service-contained-requests` | `request-boundaries` | Controlled independent listeners observing HTTP and realtime destinations |
 | `A-service-compatible-transports` | `release-matrix` | Exact release/settings matrix, protocol mismatch, and recorded compatibility review |
 | `A-notes-truthful-creation` | `creation-outcomes` | Optional creation, redirect validation, and post-submission connection loss |
@@ -26,7 +28,7 @@ an entire real-service criterion.
 ## Methods and scope
 
 Each criterion requires tests. `tool-contracts`, `credential-flow`, and
-`release-matrix` additionally require review: schemas, secret data flows, and
+`release-matrix` and `keychain-storage` additionally require review: schemas, secret data flows, and
 declared deployment support need assessment beyond successful samples.
 Every listed method is required; tests do not substitute for those reviews.
 

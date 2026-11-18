@@ -91,7 +91,7 @@ export class Fixture {
     this.requests.push({ path, cookie: req.headers.cookie ?? "" });
     if (!path.startsWith(this.prefix)) { res.writeHead(404); res.end(); return; }
     if (path === this.prefix + "auth/github") {
-      res.setHeader("set-cookie", `connect.sid=${SECRET}; Path=/; HttpOnly`);
+      res.setHeader("set-cookie", `${this.config.cookieName}=${SECRET}; Path=/; HttpOnly`);
       res.setHeader("content-type", "text/html");
       res.end("<p>Synthetic service login completed.</p>"); return;
     }
@@ -99,7 +99,7 @@ export class Fixture {
       this.meCalls++;
       res.setHeader("content-type", "application/json");
       if (this.renewal) {
-        res.setHeader("set-cookie", `connect.sid=${this.nextCookie}; Path=/; HttpOnly; Max-Age=3600`);
+        res.setHeader("set-cookie", `${this.config.cookieName}=${this.nextCookie}; Path=/; HttpOnly; Max-Age=3600`);
       }
       const body = JSON.stringify(req.headers.cookie?.includes(this.nextCookie) && this.identity
         ? { status: "ok", id: this.identity, name: "Synthetic user", photo: null } : { status: "forbidden" });
@@ -134,7 +134,7 @@ export class Fixture {
     const address = this.server.address() as { port: number };
     this.config = {
       service: serviceUrl(`http://127.0.0.1:${address.port}${this.prefix}`),
-      release: this.release, sessionFile, anonymous: false, cookieName: "connect.sid",
+      release: this.release, sessionFile, credentialStore: "file", anonymous: false, cookieName: "connect.sid",
       callMs: 1800, connectMs: 600, ackMs: 250, persistMs: 250, shutdownMs: 2000, maxBytes: 1048576,
     };
     return this.config;

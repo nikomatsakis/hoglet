@@ -16,9 +16,25 @@ additional guarantees for the note bridge and require review.
 > Statement: Hoglet must run locally for its user and connect to configured HedgeDoc services, including remotely hosted instances.
 > Source: The engineer's request for reading and editing HedgeDocs from a local server, with hedgedoc.nikomatsakis.com and hedgedoc.symposium.dev as example service instances.
 
+> **`R-multiple-services`** (accepted): **Use multiple services from one local MCP process**
+> Statement: A user can authenticate to multiple HedgeDoc services from a console, persist each service's credentials in user-scoped storage and its settings in XDG-style user directories, and use those sessions later through one MCP process, selecting the service for each note operation. `R-macos-keychain` governs credential storage on macOS.
+> Source: The engineer's request for `npm run auth hedgedoc.nikomatsakis.com`, persistent per-service console login, and explicit selection of one MCP process for all services.
+
+> **`R-macos-keychain`** (accepted): **Keep macOS session credentials in Keychain**
+> Statement: On macOS, Hoglet stores saved service credentials in the user's Keychain. Nonsecret service settings remain discoverable independently in the user's XDG directory. Existing protected-file credentials can migrate without requiring another login; Keychain failure must not silently create a plaintext copy.
+> Source: The engineer's request to store credentials in the Mac system Keychain after reviewing the existing session-file workflow.
+
+> **`R-private-node-runtime`** (accepted): **Run installed Hoglet with its own Node**
+> Statement: A local Hoglet installation includes its own pinned Node runtime and application dependencies. Authentication and MCP operation do not depend on the shell's Node/npm versions or the source checkout. macOS browser login and Keychain storage remain available.
+> Source: The engineer accepted a standalone local package and clarified that isolation from npm issues requires Hoglet's own copy of Node, rather than a container.
+
 > **`R-edit-existing-notes`** (accepted): **Read and edit existing notes**
 > Statement: MCP clients must be able to read existing HedgeDoc notes and edit their Markdown content; creation alone does not satisfy editing.
 > Source: The engineer's explicit clarification that the MCP server should allow reading and editing HedgeDocs.
+
+> **`R-cli-note-operations`** (accepted): **Expose note operations through the CLI**
+> Statement: Hoglet's existing service discovery, note reads, metadata and snapshot-checked edits are also available as local CLI commands. They reuse saved services and credentials and preserve the MCP operations' access checks and write-outcome semantics. Invoking `hoglet` without arguments prints concise command help; `hoglet mcp` explicitly starts the MCP server. Help directs callers to `hoglet skill` for LLM workflow instructions, including when the user must authenticate and how saved sessions are reused.
+> Source: The engineer's request to extend Hoglet so its functionality is available as a CLI, followed by the requests for default help, an explicit `mcp` command and separate workflow instructions through `hoglet skill`.
 
 > **`R-github-session-access`** (accepted): **Use access established through HedgeDoc's GitHub login**
 > Statement: Hoglet must support reading and editing on HedgeDoc deployments whose users authenticate through GitHub, operating with the intended user's HedgeDoc permissions.

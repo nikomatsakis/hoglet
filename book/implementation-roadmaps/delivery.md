@@ -105,7 +105,7 @@ not prerequisites to starting them.
 ### Prototype scope
 
 The engineer assigned a local TypeScript/Node prototype using the proposed
-stdio transport, one configured service per process, and `read_note`,
+stdio transport, service-scoped bridges, and `read_note`,
 `get_note_info`, and snapshot-checked exact text edits. Use the draft design to
 guide experiments; readiness does not accept every draft record or enter Building.
 Changes to accepted login, concurrency, or compatibility guarantees require
@@ -116,6 +116,32 @@ session-file implementation first. Then establish MCP/HTTP behavior, isolate
 the 1.10.3 editing protocol using development session import, exercise concurrency
 and uncertain outcomes, add the selected newer target, and integrate browser
 login. Every experimental result keeps its tested revision and coverage limits.
+
+The engineer also assigned `hoglet auth` and `npm run auth` as convenient local
+entry points, with automatic ID discovery after sign-in. This experiment keeps
+the dedicated browser and minimal cookie export, adds optional expected-ID
+validation, and preserves explicit-ID login and development import.
+The assigned multiple-service extension adds a server argument to console
+authentication, XDG data storage, persisted per-service profiles, local service
+discovery, and service selection within one MCP process. It preserves independent
+credentials, identities, snapshots and edit queues for each service.
+The engineer's Keychain request extends this assignment with macOS-native
+credential storage, nonsecret service discovery, safe migration from existing
+files, and scoped cleanup. Protected-file storage remains available for other
+platforms and explicit development use.
+The engineer also assigned standalone installation with a private pinned Node.
+This packaging experiment preserves native macOS login and Keychain, builds
+without a system Node/npm, and verifies a relocated installed process.
+The engineer's CLI extension exposes saved-service discovery, read, info and
+snapshot-checked edit commands through shared application operations. It keeps
+existing authentication/storage and tests actual commands, file/stdin input,
+write outcomes and cancellation before updating the standalone installation.
+The engineer also assigned help for a bare invocation and an explicit `mcp`
+server command, retaining `serve` as an alias and checking both actual
+protocol startup and the installed launcher.
+The engineer assigned concise command help with a pointer to `hoglet skill`.
+That local instruction command explains the LLM workflow, human authentication,
+saved-session reuse, service selection, snapshot edits and write outcomes.
 
 Controlled fixtures and disposable service instances can establish development
 behavior before live user participation. Completing `service-contracts` still
@@ -134,6 +160,21 @@ is reached. No production deployment changes are part of this milestone.
   establish reproducible application commands.
 - [x] Exercise protocol initialization, discovery, and success/error handling
   with the actual prototype process.
+- [x] Add the assigned auth entry points with automatic `/me` identity discovery,
+  command-level checks, and synthetic browser success/failure cases.
+- [x] Add per-service console authentication and XDG storage; exercise two saved
+  services through one actual MCP process, including later provisioning,
+  ambiguous/unsaved selections, isolated credentials and scoped logout.
+- [x] Add native macOS Keychain storage and verify migration, secret-free
+  metadata, renewal, per-service isolation, missing/denied access and logout.
+- [x] Package an independent local installation with a private Node, an update
+  workflow and installed-runtime browser/auth/MCP checks.
+- [x] Expose note operations through the CLI and verify parsing, saved-service
+  selection, exact/JSON output, edit outcomes, bounded input and cancellation.
+- [x] Make bare invocation print help and add explicit `mcp` startup; verify
+  actual process behavior and update installed usage.
+- [x] Add concise help and local `skill` instructions; verify the workflow
+  text, configuration-independent output and installed command.
 - [ ] Exercise browser-assisted GitHub login and development session import;
   import and actual Chromium provisioning/export against synthetic login pass.
   The real GitHub interaction remains pending.
@@ -164,14 +205,38 @@ design and authority record what the first slice promises and which questions
 remain. Cases must cover both 1.10.3 and the chosen newer-family release,
 browser login and development import, and the accepted stale-check/merge policy.
 
-- **Anchor coverage:** `A-notes-faithful-content` · `markdown-roundtrip`, `snapshot-provenance` — Partial: selected read and snapshot observations; `A-notes-precise-edits` · `replacement-validation`, `unicode-operations` — Partial: selected edit compiler and socket examples; `A-service-respect-access` · `permission-boundaries` — Partial: GitHub identity and read/edit denial; `A-service-verified-identity` · `identity-lifecycle` — Partial: provisioning and invalidation spike; `A-service-private-credentials` · `credential-flow` — Partial: prototype secret-flow tests and review; `A-service-contained-requests` · `request-boundaries` — Partial: identifier and base-path behavior; `A-service-compatible-transports` · `release-matrix` — Partial: selected release observations, not completed compatibility acceptance; `A-notes-observable-edits` · `authenticated-edit`, `concurrent-edit`, `edit-outcomes` — Partial: prototype concurrency and write observations; `A-mcp-bounded-calls` · `deadline-outcomes`, `process-lifecycle` — Partial: selected timeout and cleanup cases.
+- **Anchor coverage:** `A-notes-faithful-content` · `markdown-roundtrip`, `snapshot-provenance` — Partial: selected read and snapshot observations; `A-notes-precise-edits` · `replacement-validation`, `unicode-operations` — Partial: selected edit compiler and socket examples; `A-service-respect-access` · `permission-boundaries` — Partial: GitHub identity and read/edit denial; `A-service-verified-identity` · `identity-lifecycle` — Partial: provisioning and invalidation spike; `A-service-private-credentials` · `credential-flow`, `keychain-storage` — Partial: prototype secret-flow and native Keychain cases; independent review remains; `A-service-contained-requests` · `request-boundaries` — Partial: identifier and base-path behavior; `A-service-compatible-transports` · `release-matrix` — Partial: selected release observations, not completed compatibility acceptance; `A-notes-observable-edits` · `authenticated-edit`, `concurrent-edit`, `edit-outcomes` — Partial: prototype concurrency and write observations; `A-mcp-bounded-calls` · `deadline-outcomes`, `process-lifecycle` — Partial: selected timeout and cleanup cases.
 - **Evidence:** Partial prototype passes; criterion remains Pending because
   real GitHub-established session acceptance and matrix cases remain.
+
+#### Independent local runtime {#hoglet-delivery-2-standalone-install}
+
+The assigned packaging experiment installs and launches without system
+Node/npm and reuses browser authentication, Keychain and saved services outside
+the checkout. Runtime verification, relocation and failed-install preservation
+have executed evidence for the tested host.
+
+- **Anchor coverage:** `A-mcp-independent-install` · `standalone-runtime` — Partial: host packaging experiment; other OS/architecture targets require their own checks.
+- **Evidence:** Passed for the scoped macOS ARM64 prototype; see the packaging
+  assessment below. Other targets remain untested.
+
+#### CLI note operations {#hoglet-delivery-2-cli-operations}
+
+Actual command processes expose the existing application operations with saved
+credentials, service-bound snapshots, bounded input and truthful write
+classifications. Controlled cases cover both transport families, failed
+selection/validation and cancellation, including installed runtime use.
+
+- **Anchor coverage:** `A-cli-note-operations` · `command-contracts`, `command-cancellation` — Partial: selected prototype command, fault and installed cases; exhaustive service matrix remains.
+- **Evidence:** Passed for the scoped prototype; see the CLI assessment below.
+  Default-help and explicit-`mcp` entry-point checks also pass.
+  Concise-help and local skill instruction checks also pass.
+  Real-service/GitHub and exhaustive fault matrices remain.
 
 ### Accepted choices and remaining scope
 
 TypeScript on Node.js is accepted. The anchor-design review proposes stdio,
-one service per process, persisted HTTP reads with scoped snapshot tokens,
+multiple locally provisioned services per process, persisted HTTP reads with scoped snapshot tokens,
 exact text replacement batches, and read/edit plus metadata as the first tool
 slice. Creation is deferred, with its unchanged property tracked separately.
 
@@ -198,22 +263,26 @@ Source investigation alone does not establish authenticated compatibility.
 
 ### Readiness
 
-The engineer assigned milestone 2 with "please prototype". The runtime and
-controlled prototype checks are implemented. No further product decision blocks
-trying the executable. Real GitHub login needs the user's participation on an
-interactive browser host; this headless workspace has Chromium for synthetic
-testing. Milestone 2 remains In progress; milestone 3 remains Proposed.
+The engineer assigned milestone 2 with "please prototype" and assigned the auth
+command with automatic identity discovery. The runtime and controlled prototype
+checks are implemented. No further product decision blocks trying the executable.
+Real GitHub login needs the user's participation on an interactive browser host.
+Synthetic authentication passes with both headless Chromium and the commands'
+normal visible browser. Milestone 2 remains In progress; milestone 3 remains Proposed.
 
 ### Evidence {#hoglet-delivery-2-evidence}
 
 - Completion criteria: `protocol-session` Passed; `service-contracts` has partial
-  passing observations and remains Pending.
-- Revision: Uncommitted `master` working tree with no repository commit.
-  Runtime, tests, dependency lockfile and Book are this prototype change.
+  passing observations and remains Pending; `standalone-install` and
+  `cli-operations` Passed within their scoped prototype assessments.
+- Revision: The original prototype assessment used an uncommitted `master`
+  working tree before the initial repository commit.
   `target/prototype-evidence.json` records a source manifest and aggregate
   SHA-256 for the assessed files. Bootstrap and design evidence below retain
-  their earlier scaffold baseline.
-- Checks: `npm run typecheck`, `npm run build`, and
+  their earlier scaffold baseline. The auth and multiple-service assessment uses a local working
+  tree based on `49513f89d7fca6f3ea21733a34e991242ef0b37f`, with the auth code,
+  tests, package commands and Book edits uncommitted.
+- Original prototype checks: `npm run typecheck`, `npm run build`, and
   `HOGLET_BROWSER_TEST=1 PLAYWRIGHT_BROWSERS_PATH=/tmp/hoglet-browsers npm test`.
   Forty-eight tests pass with no skips, including 500 generated Unicode
   examples in one test. Native Node tests launch the actual MCP process,
@@ -237,6 +306,140 @@ testing. Milestone 2 remains In progress; milestone 3 remains Proposed.
   identity and save code against a synthetic service in headless mode.
   Export retains only the configured service cookie, excluding synthetic
   GitHub and unrelated credentials. This is not an actual GitHub OAuth test.
+- Auth checks: On Node 24.15.0 and npm 11.12.1, `npm run typecheck`,
+  `npm test` (58 passed, four browser cases and one native Keychain case
+  skipped), `npm run test:browser` (four passed), `npm run test:keychain`
+  (three controlled cases and one native case passed), and
+  `npm run check:criteria` (18 associations) pass.
+  `node target/auth-cli-smoke.mjs` exercises the actual CLI and `npm run auth`
+  with a positional server argument against a synthetic prefixed service,
+  using normal visible Chromium; both discover the identity without an ID
+  argument and save a mode-600 record under an isolated XDG data directory.
+  HTTP/socket and browser checks require execution outside this host's sandbox.
+- Packaging assessment: `HOGLET_NODE_ARCHIVE=<verified official archive>
+  HOGLET_LEGACY_NODE=<actual Node 18.20.2> npm run test:standalone` passes on
+  macOS ARM64. The actual shell installer builds with private Node 24.15.0/npm
+  11.12.1 while system Node is 18.20.2 and system npm is unusable. A corrupt
+  archive and a deliberately broken temporary source fail without replacing
+  the current release. A completed update selects a new release and retains
+  the old one; an unrelated command is preserved. The installation is moved,
+  including paths with spaces, and run outside the checkout with host Node
+  preload hooks set to invalid paths. Installed browser setup and visible
+  synthetic auth save native Keychain credentials; one installed stdio process
+  discovers both release fixtures, reads and edits through both Socket.IO
+  clients, observes persisted content, and honors scoped logout. Temporary
+  installation and Keychain entries are removed. `npm test` then passes 59
+  cases with five optional cases skipped; type checking, 19 criterion
+  associations, structural check, Book build and local-link inspection pass.
+  The standalone installer also installs successfully at
+  `~/.local/bin/hoglet`; an outside-checkout version check reports its private
+  Node with Node 18 first on PATH. The default installation does not read,
+  authenticate or migrate existing user services. macOS x64, Linux targets,
+  a fresh machine, interrupted-installer recovery and real GitHub login remain
+  untested. This is local prototype packaging, not a published release.
+- CLI assessment: On 2026-11-18, the local working tree based on `49513f8`
+  adds shared application operations and actual `services`, `read`, `info` and
+  `edit` commands. `target/cli-evidence.json` records the assessed source
+  manifest, SHA-256
+  `967d7cc6f44e892b434838dea0e16ad74aa13da51f533d7e1e5df26b5ca56be6`.
+  `npm test` passes 73 cases with five optional browser/native cases skipped;
+  the 14 new actual-command cases exercise both release fixtures, exact
+  raw/JSON Markdown, metadata, file/stdin replacements, stale/no-op/rejected
+  edits, default/explicit/ambiguous/unsaved services, scoped snapshots,
+  invalid/bounded input, failed identity, uncertain/accepted exit status and
+  pre/post-submission cancellation. Assertions check zero invalid submissions,
+  no replay, preserved acknowledgement and socket cleanup. Existing MCP
+  regressions pass through the shared layer.
+  `npm run typecheck` and all 21 criterion associations pass.
+  `HOGLET_NODE_ARCHIVE=<verified official archive>
+  HOGLET_LEGACY_NODE=<actual Node 18.20.2> npm run test:standalone` passes
+  again on macOS ARM64, adding installed CLI discovery/read/info/edit through
+  native Keychain and both transport fixtures, followed by MCP edits using
+  the same credentials and scoped logout. The installed commands run outside
+  the checkout with incompatible system Node and invalid host preload hooks.
+  The default standalone installation is updated with these commands.
+  Logs are `target/cli-tests.log` and `target/cli-standalone.log`.
+  This establishes selected prototype command contracts, not full anchor
+  coverage: actual GitHub, real-service CLI/permission acceptance, exhaustive
+  signal/event-order faults and other host targets remain untested.
+- CLI entry points: The subsequent local change on the same `49513f8` baseline
+  makes a bare invocation print help before service configuration and adds
+  `mcp [SERVER]`, retaining `serve` as an alias. `npm test` passes 75 cases
+  with five optional cases skipped. Actual MCP tests run the new command
+  through both release fixtures; the alias case checks positional service
+  selection, protocol-only stdout, initialization, discovery and reads.
+  Actual CLI tests compare bare/help/MCP-help output with invalid service
+  settings and assert successful exit. Type checking, all 21 criterion
+  associations and Book checks pass. The standalone installation is updated
+  with `./install.sh --skip-browser` and its verified cached Node archive.
+  `node target/mcp-entry-installed-smoke.mjs` runs the installed launcher outside
+  the checkout with Node 18 first on PATH and invalid host preload hooks:
+  bare help, both MCP commands, tool discovery, local service discovery and
+  missing-auth error handling pass using an isolated XDG directory.
+  Logs are `target/mcp-entry-tests.log` and `target/mcp-entry-install.log`.
+  These are entry-point checks; browser, native Keychain and real-service
+  acceptance were not repeated for this change.
+- CLI workflow instructions: On the same local `49513f8` baseline, concise
+  command help points to `hoglet skill`. That command prints Markdown covering
+  human authentication, saved-session reuse, CLI versus MCP, service selection,
+  read-before-edit snapshots, replacements and unconfirmed outcomes. Actual
+  CLI tests exercise output with invalid service/storage configuration and
+  reject unexpected skill arguments without echoing input. `npm test` passes
+  77 cases with five optional browser/native cases skipped; type checking and
+  all 21 criterion associations pass. `target/skill-evidence.json` records the
+  tested source manifest. The standalone installation is updated using the
+  verified cached runtime archive and `./install.sh --skip-browser`.
+  `node target/skill-installed-smoke.mjs` checks installed help/skill and
+  argument rejection, then MCP/serve initialization, discovery and missing-auth
+  handling outside the checkout with isolated XDG data, Node 18 first on PATH
+  and invalid host preload hooks. Logs are `target/skill-tests.log` and
+  `target/skill-install.log`. Book structure, rendering and local links pass.
+  These checks cover the instruction command and routing regressions; the
+  full standalone browser/native-Keychain harness and real-service acceptance
+  were not repeated for this change.
+- Auth results: Automatic `/me` discovery persists the authenticated identity.
+  Explicit expected-ID login succeeds for a match and preserves the prior
+  session on mismatch, including when `/me` renews the cookie. Forbidden
+  HTTP 200 responses never provision an anonymous cookie; cancellation closes
+  the helper, and storage failure exits promptly. Export excludes GitHub and
+  unrelated cookies. Invalid CLI options fail without echoing supplied secrets.
+  Package Volta settings select the existing runtime pins; no global defaults
+  are changed.
+- Runtime selection: The CLI validates Node before importing Playwright.
+  A real Node 18.20.2 binary downloaded from nodejs.org and checked against its
+  release SHA-256 returns `unsupported-runtime`, with the required Node range
+  and an explicit Volta command; no browser is opened. The CLI regression
+  test also covers the range boundaries and early rejection in a child process.
+  Explicit `volta run --node 24.15.0 --npm 11.12.1 npm run auth SERVER -- --help`
+  builds and launches the CLI successfully. The synthetic visible-browser
+  command smoke is repeated after changing the import order. Existing terminals
+  must select Volta's shims or invoke it explicitly; package pins alone do not
+  replace a Node executable already selected by the shell.
+- Multiple-service results: Separate console import processes register a 1.10.3
+  fixture and a prefixed 1.12.0 fixture with different users, cookie values and
+  cookie names. One actual MCP process discovers the second login after startup,
+  selects both services, keeps HTTP/socket credentials isolated, and rejects
+  an unsaved destination without contacting it. Identical content produces
+  different service-scoped snapshots; another service's token submits nothing.
+  Both services can have pending edits concurrently; SIGTERM closes both and
+  retains uncertain classifications. A later process reuses the persisted
+  profiles. Logout removes only its selected service and leaves the other usable.
+  Private-file checks, legacy records, canonical hostname/URL equivalence,
+  distinct prefix/scheme/port stores, and XDG fallback cases pass.
+- Keychain results: macOS defaults to the User (login) Keychain using
+  `@napi-rs/keyring` 2.1.2 and its pinned native binary. Actual CLI import
+  processes save separate synthetic credentials; one MCP process discovers
+  both through cookie-free metadata and reads using their distinct sessions.
+  Native renewal removes the superseded entry; selected logout preserves the
+  other service. Removing a Keychain item prevents the running MCP process's
+  next network call. Native legacy migration preserves the cookie in Keychain
+  and removes it from the metadata file. Both visible-browser auth entry points
+  repeat successfully with Keychain storage. Temporary native entries are
+  removed after tests; no existing user credentials were read or migrated.
+  Controlled-adapter cases verify denial, mismatched readback and failed
+  metadata publication preserve the original file and clean up newly staged
+  secrets. Native calls use no credential-bearing subprocess arguments.
+  Storage/adapter code was reviewed locally; independent review remains.
 - Real-service results: `scripts/acceptance.mjs`, run through actual stdio MCP
   on disposable localhost instances, passes identity/import, raw
   Unicode/frontmatter, metadata, UTF-16 editing, named ack, database-backed
@@ -267,11 +470,22 @@ testing. Milestone 2 remains In progress; milestone 3 remains Proposed.
   operation requires deployment support. The MCP SDK suppresses responses to
   canceled requests; nonsecret stderr observations retain write classification.
   Reconnect/resnapshot observation after uncertainty is not implemented;
-  the caller must re-read. No production service or private note was accessed.
+  the caller must re-read. The review also reproduced a pre-existing local
+  logout race: an in-flight cookie renewal could recreate a removed session file.
+  Saves now reject an observed removal or intervening update, but checking and
+  publishing are still not atomic across processes; stop the MCP process before
+  logout during trials. Actual locked-Keychain prompts and denial were not
+  exercised; failure cases use a controlled adapter. Crashes between Keychain
+  staging and metadata publication/old-entry deletion can leave an orphan
+  entry; automatic crash cleanup is not implemented. No production service or private
+  note was accessed by the auth assessment.
 - Supporting records: `verification/criteria.json`, `test/`, local CLI/setup
   instructions in `README.md`, `target/prototype-tests.log`,
   `target/acceptance-1.10.3.json`, and `target/acceptance-1.12.0.json`.
-- Integration context: Local working tree only; no commit, push, merge or deployment.
+  The local auth command smoke script is `target/auth-cli-smoke.mjs`.
+- Integration context: The initial prototype is committed in `49513f8`.
+  Auth, packaging and CLI changes remain local; no new commit, push, merge or
+  service deployment.
 
 ### Completion record
 
@@ -312,10 +526,11 @@ Entering Building requires the engineer's phase decision and accepted records.
 
 #### Advertised tools match their contracts {#hoglet-delivery-3-tool-contracts}
 
-Every advertised tool has matching input/output descriptions, a successful
-protocol acceptance case, and invalid-input and upstream-error cases.
+Every advertised tool and CLI note command has matching input/output
+descriptions, a successful acceptance case, and invalid-input and upstream-error
+cases. CLI cancellation and exit statuses preserve the same write observations.
 
-- **Anchor coverage:** `A-mcp-usable-tools` · `tool-contracts` — Full.
+- **Anchor coverage:** `A-mcp-usable-tools` · `tool-contracts` — Full; `A-cli-note-operations` · `command-contracts`, `command-cancellation` — Full.
 - **Evidence:** Pending.
 
 #### Service guarantees hold {#hoglet-delivery-3-service-guarantees}
@@ -326,17 +541,20 @@ call criteria for the agreed supported releases and deployment settings.
 Creation is outside this proposed slice; its anchor and the creation portions of
 shared criteria remain deferred as recorded in the roadmap index.
 
-- **Anchor coverage:** `A-notes-faithful-content` · `markdown-roundtrip` — Partial: read content; creation is deferred; `A-notes-faithful-content` · `snapshot-provenance` — Full; `A-notes-precise-edits` · `replacement-validation`, `unicode-operations` — Full; `A-service-respect-access` · `permission-boundaries` — Partial: read/edit permissions; creation is deferred; `A-service-verified-identity` · `identity-lifecycle` — Full; `A-service-private-credentials` · `credential-flow` — Full; `A-service-contained-requests` · `request-boundaries` — Full; `A-service-compatible-transports` · `release-matrix` — Full; `A-notes-observable-edits` · `authenticated-edit`, `concurrent-edit`, `edit-outcomes` — Full; `A-mcp-bounded-calls` · `deadline-outcomes`, `process-lifecycle` — Full.
+- **Anchor coverage:** `A-notes-faithful-content` · `markdown-roundtrip` — Partial: read content; creation is deferred; `A-notes-faithful-content` · `snapshot-provenance` — Full; `A-notes-precise-edits` · `replacement-validation`, `unicode-operations` — Full; `A-service-respect-access` · `permission-boundaries` — Partial: read/edit permissions; creation is deferred; `A-service-verified-identity` · `identity-lifecycle` — Full; `A-service-private-credentials` · `credential-flow`, `keychain-storage` — Full; `A-service-contained-requests` · `request-boundaries` — Full; `A-service-compatible-transports` · `release-matrix` — Full; `A-notes-observable-edits` · `authenticated-edit`, `concurrent-edit`, `edit-outcomes` — Full; `A-mcp-bounded-calls` · `deadline-outcomes`, `process-lifecycle` — Full.
 - **Evidence:** Pending.
 
 #### Contributor verification is reproducible {#hoglet-delivery-3-verification-workflow}
 
-A fresh checkout can run the documented server and Book checks. Recorded mutation
+A fresh checkout can run the documented server and Book checks. A standalone
+installation runs with its private runtime on every declared target, without
+system Node/npm or a source checkout, using the documented auth and MCP workflows.
+Recorded mutation
 results address surviving faults, and CI runs the agreed commands for the tested
 revision. Instructions describe configuration, identity provisioning, supported
 deployments, and known limits without including private credentials or notes.
 
-- **Anchor coverage:** None — contributor tooling and release preparation.
+- **Anchor coverage:** `A-mcp-independent-install` · `standalone-runtime` — Full; other contributor checks prepare the release.
 - **Evidence:** Pending.
 
 ### Completion record

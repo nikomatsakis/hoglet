@@ -5,7 +5,7 @@ import { ServiceHttp } from "./http.js";
 import { Session } from "./session.js";
 
 // Export only this service's configured credential, never storageState or GitHub cookies.
-export async function importBrowserCredential(context: BrowserContext, session: Session, userId: string): Promise<boolean> {
+export async function importBrowserCredential(context: BrowserContext, session: Session): Promise<boolean> {
   const config = session.config;
   const cookies = (await context.cookies(config.service.href)).filter(c => c.name === config.cookieName &&
     c.domain.replace(/^\./, "") === config.service.hostname && config.service.pathname.startsWith(c.path));
@@ -16,13 +16,12 @@ export async function importBrowserCredential(context: BrowserContext, session: 
     expires: c.expires > 0 ? new Date(c.expires * 1000) : "Infinity",
     hostOnly: true, domain: config.service.hostname,
   }), config.service.href);
-  session.userId = userId;
   return true;
 }
 
-export async function browserLogin(config: Config, userId: string, options: { headless?: boolean; signal?: AbortSignal } = {}): Promise<{ id: string; name: string }> {
+export async function browserLogin(config: Config, userId?: string, options: { headless?: boolean; signal?: AbortSignal } = {}): Promise<{ id: string; name: string }> {
   const browser = await chromium.launch({ headless: options.headless ?? false }).catch(() => {
-    throw new HogletError("browser-unavailable", "Install Chromium with npx playwright install chromium, and run login from a graphical desktop.");
+    throw new HogletError("browser-unavailable", "Run hoglet install-browser (checkout: npx playwright install chromium), and run hoglet auth from a graphical desktop.");
   });
   const context = await browser.newContext();
   const session = new Session(config);
@@ -34,12 +33,19 @@ export async function browserLogin(config: Config, userId: string, options: { he
     const page = await context.newPage();
     await page.goto(http.url("auth/github").href, { waitUntil: "domcontentloaded", timeout: 30000 });
     while (!signal.aborted) {
-      if (await importBrowserCredential(context, session, userId)) {
+      if (await importBrowserCredential(context, session)) {
+        let me: { id: string; name: string } | undefined;
         try {
-          const me = await http.identity(signalFor(4000, signal));
-          await session.save(); return me;
-        } catch (e) {
-          if (e instanceof HogletError && e.code === "identity-changed") throw e;
+          me = await http.discoverIdentity(signalFor(4000, signal));
+        } catch {
+          // Anonymous cookies and transient responses are expected during sign-in.
+        }
+        if (me) {
+          if (userId !== undefined && me.id !== userId)
+            throw new HogletError("identity-changed", "HedgeDoc identity differs from the requested user.");
+          session.userId = me.id;
+          await session.save();
+          return me;
         }
       }
       if (page.isClosed()) throw new HogletError("login-cancelled", "Login browser was closed.");

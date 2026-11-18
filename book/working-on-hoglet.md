@@ -12,7 +12,7 @@ The engineer directs subsequent phase transitions.
 
 | Path | Purpose |
 | --- | --- |
-| `src/` | TypeScript MCP, HTTP, session, login and realtime implementation |
+| `src/` | Shared operations, CLI/MCP, HTTP, session, login and realtime implementation |
 | `test/` | Independent expectations, service fixtures and actual-process tests |
 | `scripts/` | Criterion mapping and disposable real-service acceptance |
 | `verification/` | Project-owned TypeScript criterion associations and scope |
@@ -52,8 +52,15 @@ schema 1 implementation does not support an `[engine]` version field or
 automatically enforce this pin; contributor setup owns that check.
 
 Use Node 24.15.0 and npm 11.12.1 for the prototype. `.node-version`, the package
-engine range and package-manager field record those versions; `package-lock.json`
+engine range and package-manager field record those versions; the package's
+Volta settings select them for contributors using its shims. `package-lock.json`
 pins dependency archives. Run `npm ci` and `npm run build` from the root.
+Version files do not switch a terminal that resolves Node outside those shims.
+If an existing shell still uses Node 18, invoke
+`"$HOME/.volta/bin/volta" run --node 24.15.0 --npm 11.12.1 npm run auth SERVER`,
+or place `$HOME/.volta/bin` first in `PATH` and refresh command lookup.
+The CLI checks the supported Node range before importing Playwright and reports
+an actionable runtime error when it does not match.
 TypeScript is 7.0.2, MCP SDK 1.32.2, and the negotiated prototype MCP revision
 is 2025-11-25. The SDK is the maintained v1 line; adopting the newer MCP revision
 and SDK packages requires separate compatibility work rather than an untested upgrade.
@@ -62,6 +69,9 @@ The exact experimental service profiles are 1.10.3 and 1.12.0.
 `ot` 0.0.15 supplies the upstream-compatible text operation; provenance and
 its MIT notice are in `THIRD_PARTY_NOTICES.md`. Playwright 1.65.1 supplies
 the dedicated login browser. The runtime no longer contains the Rust scaffold.
+`@napi-rs/keyring` 2.1.2 supplies native macOS Keychain access; the npm lockfile
+also pins its platform binaries. Other platforms and explicit development
+configuration use protected files.
 Anchor Book remains a Rust development tool: it requires Rust 1.88 or newer;
 the initial adoption is checked with Rust 1.97.0.
 
@@ -79,18 +89,66 @@ npm run check:criteria
 npm run build
 ```
 
+`./install.sh` builds an independent local distribution with its own verified
+Node 24.15.0 and npm 11.12.1, without requiring system Node/npm. The default
+launcher is `~/.local/bin/hoglet`; `--prefix /absolute/path` selects another
+installation prefix. It includes locked production dependencies and installs
+Chromium in the per-user cache; `--skip-browser` defers that step to
+`hoglet install-browser`. Updates rerun the same command and retain earlier
+releases. Session settings and Keychain credentials remain outside the
+distribution. See `README.md` for MCP paths and recovery instructions.
+
+For local browser authentication, install Chromium
+with `npx playwright install chromium`, and run `npm run auth SERVER`. This builds the
+checkout, opens the service login flow, and discovers the signed-in user through
+`/me`. The installed executable exposes the same workflow as `hoglet auth SERVER`;
+optional `--user-id ID` checks a specific account. Bare hostnames use HTTPS;
+full HTTP(S) URLs support deployment prefixes. Authentication without a server
+argument uses `HOGLET_SERVICE`. Per-service metadata persists under
+`XDG_DATA_HOME`, defaulting to `~/.local/share/hoglet/`. macOS credentials live
+in the login Keychain; `HOGLET_CREDENTIAL_STORE=file` selects protected-file
+storage for development. Loading existing protected files migrates them to
+Keychain on macOS after verified storage, unless file storage is selected.
+Bare `hoglet` prints concise command help and exits. `hoglet skill` prints local
+LLM workflow instructions, including user authentication and saved-session reuse.
+`hoglet mcp` starts one stdio process that
+discovers saved services through `list_services` and accepts a service on each
+note call. `mcp SERVER` provides an optional default; `serve` remains an alias.
+
+The same application operations are available as `hoglet services`,
+`hoglet read NOTE [--service SERVER] [--json]`, `hoglet info NOTE
+[--service SERVER]`, and `hoglet edit NOTE [--service SERVER] --snapshot TOKEN
+--edits FILE`. Edits accept a JSON replacement array from a file or stdin
+(`--edits -`). Raw reads preserve Markdown exactly; JSON reads include the
+snapshot required for editing. These commands reuse saved Keychain/XDG
+sessions and the service selection and write classifications defined in
+[System Overview](design/system-overview.md#cli-note-operations). See `README.md`
+for examples and exit statuses.
+
 The structural check validates configured paths, navigation, section roles,
 and renderer alignment. The Book build additionally validates typed records,
 authority references, roadmap syntax, and anchor coverage references through
 the preprocessor. Neither check verifies the server's intended behavior.
 Inspect rendered records and affected links after Book changes.
 
-`npm test` compiles and runs native Node tests, including actual stdio process,
-HTTP and both Socket.IO generation fixtures. Its optional browser case is
+`npm test` compiles and runs native Node tests, including actual CLI/stdio
+processes, HTTP and both Socket.IO generation fixtures. CLI cases cover
+file/stdin input, exact output, saved-service selection, stale/uncertain writes,
+deadlines and process signals. Its optional browser cases are
 skipped unless enabled. Install Chromium with `npx playwright install chromium`
 and run `npm run test:browser` to exercise the actual provisioning/export code
 against synthetic authentication. A graphical desktop and user participation
 are needed for a real GitHub login; this test does not supply that evidence.
+`npm run test:keychain` runs controlled storage failures and, on macOS, an
+actual CLI/MCP/native-Keychain case using temporary synthetic entries that
+the test removes. The normal suite skips native Keychain access unless
+`HOGLET_KEYCHAIN_TEST=1`; its controlled storage cases still run.
+`npm run test:standalone` runs the actual shell installer, relocates its output,
+and exercises installed browser/auth, note CLI and stdio MCP with unavailable or legacy
+system Node/npm. It needs network/cache access and a graphical desktop and
+removes its temporary native credentials. `HOGLET_NODE_ARCHIVE` can supply the
+official cached runtime archive (still checksum-verified), and
+`HOGLET_LEGACY_NODE` can select an actual Node 18 executable for this check.
 
 `npm run check:criteria` validates the project-owned mapping against every
 Book criterion and checks source/case references. It is association validation,

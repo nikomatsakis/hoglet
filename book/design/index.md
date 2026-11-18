@@ -3,8 +3,8 @@
 The design defines the intended server. Properties are anchors at the start of
 their owning chapters; authority records explain why they must hold.
 
-- [System Overview](system-overview.md) defines the MCP boundary and initial tool
-  contracts. Its capability word is `mcp`.
+- [System Overview](system-overview.md) defines the MCP and CLI boundaries and
+  their contracts. Its capability words are `mcp` and `cli`.
 - [HedgeDoc Bridge](hedgedoc-bridge.md) defines note content, editing, HTTP and
   realtime behavior, and transport compatibility. Its capability words are
   `notes` and `service`.

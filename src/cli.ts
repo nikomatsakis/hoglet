@@ -1,32 +1,90 @@
 #!/usr/bin/env node
-import { open } from "node:fs/promises";
-import { configFromEnv, HogletError, safeError, signalFor } from "./core.js";
-import { Session, assertPrivate } from "./session.js";
-import { ServiceHttp } from "./http.js";
-import { browserLogin } from "./login.js";
-import { Bridge } from "./bridge.js";
-import { serve } from "./mcp.js";
+import { open, readFile } from "node:fs/promises";
+import { spawn } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { configFromEnv, HogletError, requireSupportedRuntime, safeError, signalFor } from "./core.js";
+import { helpText, skillText } from "./guidance.js";
 
 async function main() {
-  const [command = "serve", ...args] = process.argv.slice(2);
-  if (command === "help" || command === "--help") {
-    console.log("Hoglet: serve | login --user-id ID | import-session --user-id ID [--file PATH] | logout\nConfigure HOGLET_SERVICE and HOGLET_RELEASE (1.10.3 or 1.12.0). Import reads one cookie from stdin or an owner-only file. Install login browser: npx playwright install chromium.");
+  requireSupportedRuntime();
+  const [command = "help", ...args] = process.argv.slice(2);
+  const noteCommands = ["services", "read", "info", "edit"];
+  const commands = ["mcp", "serve", "auth", "login", "import-session", "logout"];
+  const beforeEnd = args.includes("--") ? args.slice(0, args.indexOf("--")) : args;
+  if (command === "help" || command === "--help" ||
+      ([...commands, ...noteCommands, "install-browser", "skill"].includes(command) && beforeEnd.includes("--help"))) {
+    console.log(helpText);
     return;
   }
-  const config = configFromEnv();
-  const userIndex = args.indexOf("--user-id");
-  const userId = userIndex >= 0 ? args[userIndex + 1] : undefined;
+  if (command === "skill") {
+    if (args.length) throw new HogletError("usage", "Run hoglet skill without arguments.");
+    console.log(skillText);
+    return;
+  }
+  if (command === "--version") {
+    if (args.length) throw new HogletError("usage", "Run hoglet --version without arguments.");
+    const pkg = JSON.parse(await readFile(new URL("../../package.json", import.meta.url), "utf8"));
+    console.log(`hoglet ${pkg.version} (Node ${process.versions.node})`);
+    return;
+  }
+  if (command === "install-browser") {
+    if (args.length) throw new HogletError("usage", "Run hoglet install-browser without arguments.");
+    const cli = fileURLToPath(new URL("cli.js", import.meta.resolve("playwright/package.json")));
+    process.exitCode = await new Promise<number>((resolve, reject) => {
+      const child = spawn(process.execPath, [cli, "install", "chromium"], { stdio: "inherit" });
+      const interrupt = () => child.kill("SIGINT");
+      const terminate = () => child.kill("SIGTERM");
+      process.once("SIGINT", interrupt); process.once("SIGTERM", terminate);
+      child.on("error", reject);
+      child.on("close", code => {
+        process.removeListener("SIGINT", interrupt); process.removeListener("SIGTERM", terminate);
+        resolve(code ?? 1);
+      });
+    });
+    return;
+  }
+  if (noteCommands.includes(command)) {
+    const { runNoteCommand } = await import("./note-cli.js");
+    try { await runNoteCommand(command, args); }
+    catch (error) { console.error(JSON.stringify({ error: safeError(error) })); process.exitCode = 1; }
+    return;
+  }
+  const [{ Session, assertPrivate }, { ServiceHttp }, { browserLogin }, { Services }, { serve }] =
+    await Promise.all([
+      import("./session.js"), import("./http.js"), import("./login.js"),
+      import("./services.js"), import("./mcp.js"),
+    ]);
+  if (!commands.includes(command)) throw new HogletError("usage", "Unknown local command; run hoglet help.");
+  const allowed = command === "import-session" ? ["--user-id", "--file"]
+    : command === "auth" || command === "login" ? ["--user-id"] : [];
+  const options = new Map<string, string>();
+  let serviceInput: string | undefined;
+  for (let i = 0; i < args.length; i++) {
+    const key = args[i];
+    if (!key.startsWith("--")) {
+      if (serviceInput !== undefined) throw new HogletError("usage", "Supply only one server hostname or base URL.");
+      serviceInput = key;
+    } else {
+      const value = args[++i];
+      if (!allowed.includes(key) || options.has(key) || !value || value.startsWith("--"))
+        throw new HogletError("usage", "Invalid or incomplete arguments; run hoglet help.");
+      options.set(key, value);
+    }
+  }
+  const userId = options.get("--user-id");
+  if ((userId !== undefined && !/^[A-Za-z0-9_-]{1,200}$/.test(userId)) ||
+      ((command === "login" || command === "import-session") && !userId))
+    throw new HogletError("usage", "Provisioning requires --user-id with the intended HedgeDoc user ID; auth can discover it automatically.");
+  if (command === "mcp" || command === "serve") {
+    await serve(new Services(process.env, serviceInput));
+    return;
+  }
+  const config = configFromEnv(process.env, serviceInput);
   const session = new Session(config);
-  if (command === "serve") {
-    if (args.length) throw new HogletError("usage", "serve accepts no credential arguments.");
-    if (!config.anonymous) await session.load();
-    await serve(new Bridge(config, session));
-  } else if (command === "logout") {
+  if (command === "logout") {
     await session.logout(); console.log("Local session removed.");
-  } else if (command === "login" || command === "import-session") {
-    if (!userId || !/^[A-Za-z0-9_-]{1,200}$/.test(userId))
-      throw new HogletError("usage", "Provisioning requires --user-id with the intended HedgeDoc user ID.");
-    if (command === "login") {
+  } else if (command === "auth" || command === "login" || command === "import-session") {
+    if (command !== "import-session") {
       console.error("Complete the service's GitHub login in the browser. Only the HedgeDoc session will be saved.");
       const cancel = new AbortController();
       const stop = () => cancel.abort();
@@ -35,9 +93,8 @@ async function main() {
       finally { process.removeListener("SIGINT", stop); process.removeListener("SIGTERM", stop); }
     } else {
       let cookie = "";
-      const fileIndex = args.indexOf("--file");
-      if (fileIndex >= 0) {
-        const path = args[fileIndex + 1];
+      const path = options.get("--file");
+      if (path !== undefined) {
         await assertPrivate(path);
         const file = await open(path, "r");
         try {
@@ -51,7 +108,7 @@ async function main() {
           if (Buffer.byteLength(cookie) > 8192) throw new HogletError("invalid-session", "Import exceeds the credential limit.");
         }
       }
-      await session.provision(cookie.trim(), userId);
+      await session.provision(cookie.trim(), userId!);
       const me = await new ServiceHttp(config, session).identity(signalFor(config.callMs));
       await session.save(); console.log(JSON.stringify(me));
     }

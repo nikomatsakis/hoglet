@@ -33,8 +33,8 @@ additional guarantees for the note bridge and require review.
 > Source: The engineer's explicit clarification that the MCP server should allow reading and editing HedgeDocs.
 
 > **`R-cli-note-operations`** (accepted): **Expose note operations through the CLI**
-> Statement: Hoglet's existing service discovery, note reads, metadata and snapshot-checked edits are also available as local CLI commands. They reuse saved services and credentials and preserve the MCP operations' access checks and write-outcome semantics. Invoking `hoglet` without arguments prints concise command help; `hoglet mcp` explicitly starts the MCP server. Help directs callers to `hoglet skill` for LLM workflow instructions, including when the user must authenticate and how saved sessions are reused.
-> Source: The engineer's request to extend Hoglet so its functionality is available as a CLI, followed by the requests for default help, an explicit `mcp` command and separate workflow instructions through `hoglet skill`.
+> Statement: Hoglet's existing service discovery, note reads, metadata and snapshot-checked edits are also available as local CLI commands. They reuse saved services and credentials and preserve the MCP operations' access checks and write-outcome semantics. Invoking `hoglet` without arguments prints concise command help; `hoglet mcp` explicitly starts the MCP server. Help directs callers to `hoglet skill` for LLM workflow instructions, including when the user must authenticate and how saved sessions are reused. `hoglet auth --help` explains browser login and manual headless-machine session import using Firefox or Chrome on another machine.
+> Source: The engineer's requests for CLI operations, default help, explicit MCP startup, LLM instructions and auth help covering the explained Firefox/Chrome session-import workflow.
 
 > **`R-github-session-access`** (accepted): **Use access established through HedgeDoc's GitHub login**
 > Statement: Hoglet must support reading and editing on HedgeDoc deployments whose users authenticate through GitHub, operating with the intended user's HedgeDoc permissions.

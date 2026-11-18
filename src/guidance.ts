@@ -19,6 +19,85 @@ Usage: hoglet COMMAND
 
 Use \`hoglet skill\` to get instructions.`;
 
+export const authHelpText = `Hoglet authentication
+
+Usage:
+  hoglet auth [SERVER] [--user-id ID]
+  hoglet login [SERVER] --user-id ID
+  hoglet import-session [SERVER] --user-id ID [--file PATH]
+
+SERVER is a hostname (HTTPS) or an HTTP(S) base URL, including any deployment
+prefix. Without SERVER, set HOGLET_SERVICE to the full base URL.
+
+Browser login on this machine
+
+  hoglet auth hedgedoc.example.test
+
+Complete GitHub sign-in in the dedicated Chromium window. Hoglet discovers
+your HedgeDoc user ID through /me, saves the session and closes the window.
+You do not need to copy an ID or cookie. Optional --user-id ID checks the account.
+The legacy login command requires --user-id; auth discovers the ID by default.
+If Chromium is missing, run hoglet install-browser first. A graphical desktop
+is required. From a checkout, npm run auth SERVER builds and runs this flow.
+
+Headless machine: import a login established elsewhere
+
+This manual workflow uses Firefox or Chrome on a laptop or another desktop.
+Fresh terminal-only login and automated session transfer are not implemented.
+
+1. In that browser, sign into the intended HedgeDoc service normally.
+   Open its base URL followed by me, for example:
+     https://hedgedoc.example.test/me
+   Copy the JSON id field. This is your HedgeDoc ID, not your GitHub username.
+   Preserve any deployment prefix: https://hedgedoc.example.test/pad/me.
+
+2. Open browser developer tools (Cmd+Option+I on macOS; Ctrl+Shift+I on
+   Linux/Windows). Find the cookies for the HedgeDoc site:
+   Firefox: Storage -> Cookies -> your HedgeDoc domain.
+   Chrome: Application -> Storage -> Cookies -> your HedgeDoc site.
+   Find connect.sid and copy its Value from the cookie table exactly.
+   In Chrome, leave "Show URL-decoded" off. Preserve escapes such as %3A;
+   do not decode the value or copy a parsed sidebar representation.
+   Copy only the HedgeDoc cookie, not GitHub cookies.
+
+3. On the machine running Hoglet (for example, through SSH), create a private
+   file using a terminal editor. Paste the copied value into the editor:
+
+     umask 077
+     vi "$HOME/hoglet-cookie"
+
+   The file must contain exactly one name=value line, with no quotes or
+   cookie attributes:
+
+     connect.sid=PASTE_EXACT_COOKIE_VALUE
+
+   Keep the cookie out of command-line arguments, chats and repository files.
+
+4. On that machine, replace SERVER and ID_FROM_ME below with your service
+   and the id copied from /me, then run:
+
+     chmod 600 "$HOME/hoglet-cookie"
+     hoglet import-session SERVER --user-id ID_FROM_ME --file "$HOME/hoglet-cookie"
+
+   Hoglet checks the cookie against /me, requires the expected identity and
+   saves the session. It prints the verified ID and name on success.
+   After a successful import, delete the temporary file:
+
+     rm "$HOME/hoglet-cookie"
+
+   Import also accepts piped stdin when --file is omitted.
+
+Saved sessions are reused by CLI and MCP; do not authenticate for every call.
+Repeat login/import when a session expires. macOS saves credentials in Keychain;
+Linux uses protected files. Service metadata lives under $XDG_DATA_HOME/hoglet,
+defaulting to ~/.local/share/hoglet.
+
+The default service profile is 1.10.3. For 1.12.0, set HOGLET_RELEASE=1.12.0
+before auth or import. A custom cookie name requires HOGLET_COOKIE_NAME and
+that same name in the import file.
+
+Use \`hoglet skill\` for the service selection and read/edit workflow.`;
+
 export const skillText = `# Using Hoglet
 
 Hoglet reads and edits existing HedgeDoc notes with the user's saved access.
@@ -48,6 +127,9 @@ The user completes the service's GitHub sign-in in a dedicated Chromium window.
 Hoglet discovers their HedgeDoc user ID through /me and saves the session.
 Do not ask the user to copy their ID, cookies or tokens. Login is a separate
 console workflow, outside MCP tools, and requires a graphical desktop.
+For a headless machine, direct the user to \`hoglet auth --help\` for manual
+session import from Firefox or Chrome on another machine. That workflow
+still requires a signed-in browser elsewhere; do not ask for cookies in chat.
 Use an existing valid saved session; do not run auth before every operation.
 Repeat auth for each service and when its session expires.
 

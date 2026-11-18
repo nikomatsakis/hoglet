@@ -106,6 +106,11 @@ try {
   assert(skill.out.startsWith("# Using Hoglet\n"));
   assert(skill.out.includes("do not run auth before every operation"));
   assert(skill.out.includes("Never blindly retry accepted or uncertain writes"));
+  const authHelp = await run(launcher, ["auth", "--help"], { ...env, HOGLET_SERVICE: "invalid://configuration" });
+  passed(authHelp); assert.equal(authHelp.err, "");
+  assert(authHelp.out.includes("Firefox: Storage -> Cookies"));
+  assert(authHelp.out.includes("Chrome: Application -> Storage -> Cookies"));
+  assert(authHelp.out.includes("hoglet import-session SERVER --user-id ID_FROM_ME --file"));
   console.log("standalone-runtime: verified archive, private Node/npm build, failed-update preservation and relocation passed.");
 
   // No npm, checkout paths or compatible system Node in this installed workflow.

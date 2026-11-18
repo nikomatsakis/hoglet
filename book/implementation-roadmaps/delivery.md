@@ -142,6 +142,8 @@ protocol startup and the installed launcher.
 The engineer assigned concise command help with a pointer to `hoglet skill`.
 That local instruction command explains the LLM workflow, human authentication,
 saved-session reuse, service selection, snapshot edits and write outcomes.
+The engineer also assigned dedicated `auth --help` instructions for graphical
+login and manual session import on a headless machine using Firefox or Chrome.
 
 Controlled fixtures and disposable service instances can establish development
 behavior before live user participation. Completing `service-contracts` still
@@ -175,6 +177,8 @@ is reached. No production deployment changes are part of this milestone.
   actual process behavior and update installed usage.
 - [x] Add concise help and local `skill` instructions; verify the workflow
   text, configuration-independent output and installed command.
+- [x] Add dedicated auth help with Firefox/Chrome cookie and `/me` guidance,
+  private-file import, verification and cleanup; check actual installed output.
 - [ ] Exercise browser-assisted GitHub login and development session import;
   import and actual Chromium provisioning/export against synthetic login pass.
   The real GitHub interaction remains pending.
@@ -231,6 +235,7 @@ selection/validation and cancellation, including installed runtime use.
 - **Evidence:** Passed for the scoped prototype; see the CLI assessment below.
   Default-help and explicit-`mcp` entry-point checks also pass.
   Concise-help and local skill instruction checks also pass.
+  Dedicated auth-help instruction checks also pass.
   Real-service/GitHub and exhaustive fault matrices remain.
 
 ### Accepted choices and remaining scope
@@ -397,6 +402,23 @@ normal visible browser. Milestone 2 remains In progress; milestone 3 remains Pro
   These checks cover the instruction command and routing regressions; the
   full standalone browser/native-Keychain harness and real-service acceptance
   were not repeated for this change.
+- Authentication help: The local `main` change based on `dbce25c` gives
+  `auth --help`, `login --help` and `import-session --help` dedicated browser
+  login and headless-machine instructions. These cover Firefox/Chrome cookie
+  lookup, exact-value preservation, `/me` identity, private-file import,
+  verification and cleanup; skill directs the user to these instructions.
+  Actual-process tests check all three commands with invalid service/storage
+  configuration, positional arguments and nonsecret fixed output. Global help
+  stays concise. `npm test` passes 78 cases with five optional cases skipped;
+  type checking, all 21 criterion associations and Book checks pass.
+  The standalone installation is updated with the verified cached runtime
+  archive. `node target/auth-help-installed-smoke.mjs` passes outside the
+  checkout with Node 18 first on PATH, invalid host preload hooks and isolated
+  XDG data, checking dedicated/global help, skill and MCP startup.
+  Logs are `target/auth-help-tests.log` and `target/auth-help-install.log`.
+  These checks verify help output and routing; interactive Firefox/Chrome
+  cookie-copy steps, browser/native-Keychain acceptance and real-service
+  acceptance were not repeated. The login/import implementation is unchanged.
 - Auth results: Automatic `/me` discovery persists the authenticated identity.
   Explicit expected-ID login succeeds for a match and preserves the prior
   session on mismatch, including when `/me` renews the cookie. Forbidden
@@ -484,8 +506,9 @@ normal visible browser. Milestone 2 remains In progress; milestone 3 remains Pro
   `target/acceptance-1.10.3.json`, and `target/acceptance-1.12.0.json`.
   The local auth command smoke script is `target/auth-cli-smoke.mjs`.
 - Integration context: The initial prototype is committed in `49513f8`.
-  Auth, packaging and CLI changes remain local; no new commit, push, merge or
-  service deployment.
+  Auth, packaging and CLI workflow changes are published in `dbce25c` on
+  `origin/main`. Dedicated auth-help additions are included in this source
+  change; no service deployment.
 
 ### Completion record
 

@@ -81,6 +81,12 @@ An optional `--user-id ID` requires that specific identity; the existing
 `login --user-id ID` command retains the same explicit check. The local
 `import-session --user-id ID` command requires the intended ID and reads one
 configured session cookie from stdin or an owner-only file.
+`hoglet auth --help` explains both browser provisioning and manual import on a
+headless machine. Its Firefox/Chrome instructions use an existing signed-in
+browser elsewhere to retrieve `/me` identity and the exact HedgeDoc cookie,
+then a private file on the target machine for import and cleanup. This reuses
+an existing session; it does not implement fresh terminal-only GitHub login or
+automated transfer. Help exits without accessing service configuration or credentials.
 
 Store the minimal service credential in a user-scoped store or a file readable
 only by the owner, with a protected parent directory. Do not retain the full

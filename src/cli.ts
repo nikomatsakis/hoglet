@@ -3,7 +3,7 @@ import { open, readFile } from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { configFromEnv, HogletError, requireSupportedRuntime, safeError, signalFor } from "./core.js";
-import { helpText, skillText } from "./guidance.js";
+import { authHelpText, helpText, skillText } from "./guidance.js";
 
 async function main() {
   requireSupportedRuntime();
@@ -13,7 +13,7 @@ async function main() {
   const beforeEnd = args.includes("--") ? args.slice(0, args.indexOf("--")) : args;
   if (command === "help" || command === "--help" ||
       ([...commands, ...noteCommands, "install-browser", "skill"].includes(command) && beforeEnd.includes("--help"))) {
-    console.log(helpText);
+    console.log(["auth", "login", "import-session"].includes(command) ? authHelpText : helpText);
     return;
   }
   if (command === "skill") {

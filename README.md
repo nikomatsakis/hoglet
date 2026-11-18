@@ -137,12 +137,15 @@ and cookie name, defaulting to 1.10.3 and `connect.sid`.
 `HOGLET_SERVICE` provides a default server when you omit the argument; an
 explicit server argument overrides it.
 
-For development, put exactly one `connect.sid=...` cookie in an owner-only file
-using a local editor, then import it:
+For a headless machine, `hoglet auth --help` explains manual session import:
+sign into HedgeDoc in Firefox or Chrome elsewhere, copy the HedgeDoc cookie
+and `/me` ID, and paste the cookie into an owner-only file on the target machine.
+This reuses an existing browser login. Put exactly one `connect.sid=...` line
+in the file using a local editor, then import it:
 
 ```sh
 chmod 600 /path/to/protected-cookie-file
-node dist/src/cli.js import-session SERVER --user-id YOUR_HEDGEDOC_USER_ID \
+hoglet import-session SERVER --user-id YOUR_HEDGEDOC_USER_ID \
   --file /path/to/protected-cookie-file
 ```
 

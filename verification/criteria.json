@@ -2,7 +2,7 @@
   "A-cli-note-operations:command-contracts": {
     "coverage": "partial",
     "files": ["test/cli.test.ts", "test/mcp.test.ts", "test/note-cli.test.ts", "scripts/test-standalone.mjs"],
-    "cases": ["CLI entry points", "CLI skill", "MCP command aliases", "exact raw/JSON reads", "classified write outcomes", "CLI selection", "CLI validation"],
+    "cases": ["CLI entry points", "CLI skill", "dedicated help", "MCP command aliases", "exact raw/JSON reads", "classified write outcomes", "CLI selection", "CLI validation"],
     "gap": "Selected actual-command and installed-runtime cases; full real-service/GitHub/permission matrix remains."
   },
   "A-cli-note-operations:command-cancellation": {

@@ -70,6 +70,41 @@ test("local auth CLI: help and automatic identity need no copied user ID", async
   assert.equal(auth.out, "");
 });
 
+test("local auth CLI: dedicated help explains browser login and Firefox/Chrome headless import without access", async () => {
+  const env = {
+    HOGLET_SERVICE: "invalid://configuration", HOGLET_SESSION_FILE: "/nonexistent/session.json",
+    HOGLET_RELEASE: "invalid", HOGLET_CREDENTIAL_STORE: "invalid",
+  };
+  const help = await cli(["auth", "--help"], env);
+  assert.equal(help.code, 0, help.err);
+  assert.equal(help.err, "");
+  assert(help.out.startsWith("Hoglet authentication\n"));
+  for (const instruction of [
+    "dedicated Chromium", "hoglet install-browser", "graphical desktop",
+    "Headless machine", "terminal-only login", "not implemented",
+    "Firefox: Storage -> Cookies", "Chrome: Application -> Storage -> Cookies",
+    "JSON id field", "pad/me", "connect.sid=PASTE_EXACT_COOKIE_VALUE",
+    "do not decode", "umask 077", 'vi "$HOME/hoglet-cookie"',
+    "chmod 600", "hoglet import-session SERVER --user-id ID_FROM_ME --file",
+    "requires the expected identity", "After a successful import", 'rm "$HOME/hoglet-cookie"',
+    "do not authenticate for every call", "HOGLET_RELEASE", "HOGLET_COOKIE_NAME",
+  ]) assert(help.out.includes(instruction), instruction);
+  for (const args of [
+    ["auth", "hedgedoc.example.test", "--help"],
+    ["auth", "--user-id", "SYNTHETIC-CLI-SECRET", "--help"],
+    ["login", "--help"], ["import-session", "--help"],
+  ]) {
+    const result = await cli(args, env);
+    assert.equal(result.code, 0, result.err);
+    assert.equal(result.out, help.out);
+    assert.equal(result.err, "");
+    assert(!result.out.includes("SYNTHETIC-CLI-SECRET"));
+  }
+  const global = await cli(["--help"], env);
+  assert(global.out.split("\n").length < 25);
+  assert(!global.out.includes("PASTE_EXACT_COOKIE_VALUE"));
+});
+
 test("CLI skill: local workflow explains authentication, reuse and checked edits without service access", async () => {
   const result = await cli(["skill"], {
     HOGLET_SERVICE: "invalid://configuration", HOGLET_SESSION_FILE: "/nonexistent/session.json",

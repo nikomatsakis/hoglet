@@ -103,7 +103,10 @@ with `npx playwright install chromium`, and run `npm run auth SERVER`. This buil
 checkout, opens the service login flow, and discovers the signed-in user through
 `/me`. The installed executable exposes the same workflow as `hoglet auth SERVER`;
 optional `--user-id ID` checks a specific account. Bare hostnames use HTTPS;
-full HTTP(S) URLs support deployment prefixes. Authentication without a server
+full HTTP(S) URLs support deployment prefixes.
+`hoglet auth --help` explains normal browser login and the Firefox/Chrome
+manual-import workflow for a headless machine.
+Authentication without a server
 argument uses `HOGLET_SERVICE`. Per-service metadata persists under
 `XDG_DATA_HOME`, defaulting to `~/.local/share/hoglet/`. macOS credentials live
 in the login Keychain; `HOGLET_CREDENTIAL_STORE=file` selects protected-file
